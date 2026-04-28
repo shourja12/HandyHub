@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import AnimatedBackground from "./components/AnimatedBackground";
 import TiltCard from "./components/TiltCard";
@@ -30,14 +30,15 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [points,      setPoints]      = useState(120);
   const [loading,     setLoading]     = useState(true);
+  const [backendDown, setBackendDown] = useState(false);
   const [flashPoints, triggerFlash]   = useFlash();
 
   // Fetch tasks
   useEffect(() => {
     axios
       .get("http://localhost:8000/tasks")
-      .then(res => setTasks(res.data))
-      .catch(err => console.error("Error fetching tasks:", err))
+      .then(res => { setTasks(res.data); setBackendDown(false); })
+      .catch(err => { console.error("Error fetching tasks:", err); setBackendDown(true); })
       .finally(() => setLoading(false));
   }, []);
 
@@ -226,6 +227,12 @@ export default function Home() {
                   <div className="h-3 bg-white/5  rounded-full w-4/5" />
                 </div>
               ))}
+            </div>
+          ) : backendDown ? (
+            <div className="glass rounded-3xl p-12 text-center">
+              <p className="text-5xl mb-4">🔌</p>
+              <p className="text-gray-200 text-lg font-semibold mb-2">Backend Offline</p>
+              <p className="text-gray-500 text-sm">The task server isn't running. Start your backend at <code className="text-indigo-400">localhost:8000</code> to see tasks.</p>
             </div>
           ) : filteredTasks.length === 0 ? (
             <div className="glass rounded-3xl p-12 text-center">
